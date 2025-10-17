@@ -55,10 +55,10 @@ def reportpage(request):
         name=request.POST.get("name")
         mobile=request.POST.get("mobile")
         description=request.POST.get("description")
-
+        
         print(file)
     
-        Report.objects.create(picture=file,name=name,mobile=mobile,description=description)
+        Report.objects.create(picture=file,name=name,mobile=mobile,description=description,user=request.user)
     return render(request,"report.html")
 
 def logoutuser(request):
