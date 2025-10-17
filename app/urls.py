@@ -11,6 +11,7 @@ urlpatterns = [
     path("report", reportpage, name="report"),
     path("admin-page", adminpage, name="admin"),
     path("feedback", feedback, name="feedback"),
+    path("track", track, name="track"),
 ]
 
 if settings.DEBUG:

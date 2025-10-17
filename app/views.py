@@ -68,3 +68,6 @@ def logoutuser(request):
 def feedback(request):
     return render(request,"feedback.html")
 
+def track(request):
+    return render(request,"track.html")
+
