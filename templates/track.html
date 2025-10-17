@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Track Complaints - CleanSweep</title>
+<style>
+body { margin:0; font-family:"Poppins",sans-serif; background: linear-gradient(135deg,#a5d6a7,#4db6ac); color:#00332d; min-height:100vh; display:flex; }
+/* Sidebar */
+.sidebar { width:220px; background:white; border-right:3px solid #a5d6a7; padding:20px; display:flex; flex-direction:column; gap:10px; }
+.sidebar h2 { color:#004d40; text-align:center; margin-bottom:20px; }
+.sidebar button { background:none; border:none; padding:10px; border-radius:8px; cursor:pointer; text-align:left; font-size:15px; color:#004d40; transition: all 0.3s; }
+.sidebar button:hover, .sidebar button.active { background:#b2dfdb; font-weight:bold; transform:scale(1.03); }
+/* Main Area */
+.main { flex:1; padding:30px; background:#f0fdfb; overflow-y:auto; animation:fadeIn 0.8s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+header h1 { color:#004d40; }
+.user { display:flex; align-items:center; gap:10px; }
+.avatar { width:35px; height:35px; background:#004d40; color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; }
+/* Filter & Search */
+.filters { display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; }
+.filters select, .filters input { padding:8px 10px; border-radius:8px; border:1px solid #004d40; outline:none; }
+.filters input { flex:1; }
+/* Table */
+.table-section { background:white; border-radius:10px; padding:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { padding:10px; border-bottom:1px solid #ccc; text-align:left; font-size:14px; }
+th { color:#004d40; }
+.status { padding:4px 10px; border-radius:10px; color:white; font-size:13px; }
+.status.pending { background:#ffb300; }
+.status.resolved { background:#4caf50; }
+.status.active { background:#4db6ac; }
+img.photo { width:50px; height:50px; object-fit:cover; border-radius:5px; }
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-thumb { background:#80cbc4; border-radius:10px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+<h2>🧹 CleanSweep Campus</h2>
+<button onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
+<button onclick="window.location.href='report.html'">📢 Report Issue</button>
+<button class="active">📊 Track Complaints</button>
+<button onclick="window.location.href='feedback.html'">💬 Feedback</button>
+<button onclick="logout()">🚪 Logout</button>
+</aside>
+
+<main class="main">
+<header>
+<h1>Track Complaints</h1>
+<div class="user">
+<span class="avatar" id="avatar">A</span>
+<span id="username">User</span>
+</div>
+</header>
+
+<div class="filters">
+<select id="statusFilter">
+<option value="">All Status</option>
+<option value="active">Active</option>
+<option value="resolved">Resolved</option>
+<option value="pending">Pending</option>
+</select>
+
+<input type="text" id="searchInput" placeholder="Search by description or coordinator...">
+</div>
+
+<section class="table-section">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Description</th>
+<th>Status</th>
+<th>Coordinator</th>
+<th>Photo</th>
+<th>Location</th>
+<th>Updated</th>
+</tr>
+</thead>
+<tbody id="complaintTable"></tbody>
+</table>
+</section>
+</main>
+
+<script>
+// Logout
+function logout(){ localStorage.removeItem('rememberedUser'); window.location.href='login.html'; }
+
+// Load user info
+window.onload = ()=>{
+const user = JSON.parse(localStorage.getItem('rememberedUser'));
+//if(!user){ window.location.href='login.html'; return; }
+document.getElementById('username').innerText = user.username;
+document.getElementById('avatar').innerText = user.username[0].toUpperCase();
+
+loadComplaints();
+}
+
+// Load complaints
+function loadComplaints(){
+let complaints = JSON.parse(localStorage.getItem('complaints')) || [];
+complaints.reverse();
+displayTable(complaints);
+}
+
+// Display table with optional filtering
+function displayTable(data){
+const tbody = document.getElementById('complaintTable');
+tbody.innerHTML='';
+
+data.forEach(c=>{
+const tr=document.createElement('tr');
+tr.innerHTML=`
+<td>${c.id}</td>
+<td>${c.description}</td>
+<td><span class="status ${c.status}">${c.status}</span></td>
+<td>${c.coordinator || '-'}</td>
+<td>${c.photo ? `<img class="photo" src="${c.photo}" alt="photo">` : '-'}</td>
+<td>${c.latitude && c.longitude ? c.latitude.toFixed(4)+', '+c.longitude.toFixed(4) : '-'}</td>
+<td>${c.updated}</td>
+`;
+tbody.appendChild(tr);
+});
+}
+
+// Filters
+document.getElementById('statusFilter').addEventListener('change', ()=>{
+applyFilters();
+});
+
+document.getElementById('searchInput').addEventListener('input', ()=>{
+applyFilters();
+});
+
+function applyFilters(){
+const status = document.getElementById('statusFilter').value.toLowerCase();
+const keyword = document.getElementById('searchInput').value.toLowerCase();
+let complaints = JSON.parse(localStorage.getItem('complaints')) || [];
+complaints = complaints.filter(c=>{
+return (!status || c.status===status) && 
+(c.description.toLowerCase().includes(keyword) || (c.coordinator && c.coordinator.toLowerCase().includes(keyword)));
+});
+displayTable(complaints);
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback - CleanSweep</title>
+<style>
+body{font-family:"Poppins",sans-serif;background:linear-gradient(135deg,#b2dfdb,#004d40);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+.container{background:#e0f2f1;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,0.2);width:100%;max-width:500px;padding:30px;}
+.container h2{text-align:center;color:#004d40;margin-bottom:20px;}
+textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #004d40;font-size:14px;resize:vertical;min-height:100px;}
+.btn{width:100%;padding:12px;background:#004d40;color:white;border:none;border-radius:20px;cursor:pointer;margin-top:10px;transition:background 0.3s;}
+.btn:hover{background:#00332d;}
+.back-link{display:block;text-align:center;margin-top:12px;color:#004d40;text-decoration:none;font-weight:600;}
+.back-link:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Submit Feedback</h2>
+<textarea id="feedback" placeholder="Write your feedback here..."></textarea>
+<button class="btn" onclick="submitFeedback()">Submit</button>
+<a href="dashboard.html" class="back-link">⬅ Back to Dashboard</a>
+</div>
+
+<script>
+function submitFeedback(){
+  const feedback=document.getElementById('feedback').value.trim();
+  if(!feedback){alert("Please enter feedback");return;}
+
+  const user=JSON.parse(localStorage.getItem('rememberedUser'));
+  if(!user){alert("Please login first");window.location.href='login.html';return;}
+
+  const feedbacks=JSON.parse(localStorage.getItem('feedbacks'))||[];
+  feedbacks.push({id:Date.now(),username:user.username,feedback,updated:new Date().toLocaleString()});
+  localStorage.setItem('feedbacks',JSON.stringify(feedbacks));
+  alert("Feedback submitted successfully!");
+  window.location.href='dashboard.html';
+}
+</script>
+</body>
+</html>

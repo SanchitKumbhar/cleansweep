@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanSweep Login/Signup</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif; }
+  body { background: linear-gradient(to bottom right, #a5d6a7, #4db6ac); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+  .container { background:#fff; width:380px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.2); overflow:hidden; }
+  .header { background: linear-gradient(to bottom, #a5d6a7, #4db6ac); color:white; text-align:center; padding:25px; }
+  .header h2 { font-size:22px; margin-bottom:5px; }
+  .header p { font-size:14px; color:#e0f2f1; }
+  .form { padding:25px; }
+  .form h3 { text-align:center; margin-bottom:20px; color:#004d40; }
+  .input-group { margin-bottom:15px; position:relative; }
+  .input-group input { width:100%; padding:10px 12px; border-radius:25px; border:1px solid #ccc; outline:none; transition:0.3s; }
+  .input-group input:focus { border-color:#004d40; }
+  .input-group span { position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#004d40; }
+  .message { font-size:12px; color:red; margin-top:5px; }
+  .strength { font-size:12px; margin-top:5px; font-weight:bold; }
+  .btn { width:100%; padding:10px; border:none; border-radius:25px; background:#004d40; color:white; cursor:pointer; font-size:16px; transition:0.3s; margin-top:10px; }
+  .btn:hover { background:#00332d; }
+  .toggle-link { text-align:center; margin-top:15px; font-size:14px; cursor:pointer; color:#00796b; }
+  .toggle-link:hover { text-decoration:underline; }
+  .options { display:flex; justify-content:space-between; font-size:12px; margin-bottom:15px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#004d40; color:white; padding:10px 20px; border-radius:25px; display:none; opacity:0.9; z-index:1000; }
+</style>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>Welcome To CleanSweep Campus</h2>
+    <p>KJEI's Trinity Academy Of Engineering</p>
+  </div>
+  <form action="/login" method="post">
+    {% csrf_token %}
+  <div class="form" id="loginForm">
+    <h3>USER LOGIN</h3>
+    <div class="input-group">
+      <input type="text" name="username" id="loginEmail" placeholder="username">
+      <div class="message" id="loginEmailMsg"></div>
+    </div>
+    <div class="input-group">
+      <input type="password" name="password" id="loginPassword" placeholder="Password">
+      <span onclick="togglePassword('loginPassword', this)">👁️</span>
+      <div class="message" id="loginPasswordMsg"></div>
+    </div>
+    <div class="options">
+      <label><input type="checkbox" id="remember"/> Remember me</label>
+      <span style="cursor:pointer;color:#00796b;" onclick="forgotPassword()">Forgot Password?</span>
+    </div>
+    <button class="btn" type="submit">Login</button>
+    <div class="toggle-link" onclick="toggleForms()">Don't have an account? Sign Up</div>
+  </div>
+  </form>
+
+  <div class="form" id="signupForm" style="display:none;">
+    <form action="/signup" method="post">
+      {% csrf_token %}
+    <h3>USER SIGNUP</h3>
+    <div class="input-group">
+      <input type="text" name="username" id="signupEmail" placeholder="username">
+      <div class="message" id="signupEmailMsg"></div>
+    </div>
+    <div class="input-group">
+      <input type="password" name="password" id="signupPassword" placeholder="Password">
+      <span onclick="togglePassword('signupPassword', this)">👁️</span>
+      <div class="strength" id="passwordStrength"></div>
+    </div>
+    <div class="input-group">
+      <input type="password" id="confirmPassword" placeholder="Confirm Password">
+      <span onclick="togglePassword('confirmPassword', this)">👁️</span>
+      <div class="message" id="confirmPasswordMsg"></div>
+    </div>
+    <button type="submit" class="btn">Sign Up</button>
+    <div class="toggle-link" onclick="toggleForms()">Already have an account? Login</div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let users = JSON.parse(localStorage.getItem('users')) || [];
+
+// Show toast messages
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.display = 'block';
+  setTimeout(()=>toast.style.display='none', 3000);
+}
+
+// Toggle password visibility
+function togglePassword(inputId, icon) {
+  const input = document.getElementById(inputId);
+  if(input.type === "password") { input.type="text"; icon.innerText="🙈"; }
+  else { input.type="password"; icon.innerText="👁️"; }
+}
+
+// Toggle between login and signup forms
+function toggleForms() {
+  document.getElementById('loginForm').style.display = 
+    document.getElementById('loginForm').style.display === "none" ? "block":"none";
+  document.getElementById('signupForm').style.display = 
+    document.getElementById('signupForm').style.display === "none" ? "block":"none";
+}
+
+// Email validation
+function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+// Password strength
+document.getElementById('signupPassword').addEventListener('input', function() {
+  const val = this.value;
+  const strengthEl = document.getElementById('passwordStrength');
+  if(val.length<6) strengthEl.innerText="Weak"; 
+  else if(val.match(/[A-Z]/) && val.match(/[0-9]/) && val.length>=6) strengthEl.innerText="Strong";
+  else strengthEl.innerText="Medium";
+});
+
+// Signup function
+function signup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+
+  document.getElementById('signupEmailMsg').innerText='';
+  document.getElementById('confirmPasswordMsg').innerText='';
+
+  if(!email || !password || !confirm) { showToast("All fields are required"); return; }
+  if(!validateEmail(email)) { document.getElementById('signupEmailMsg').innerText="Invalid email"; return; }
+  if(password !== confirm) { document.getElementById('confirmPasswordMsg').innerText="Passwords do not match"; return; }
+
+  if(users.find(u=>u.username===email)) { showToast("User already exists"); return; }
+
+  users.push({username:email, password});
+  localStorage.setItem('users', JSON.stringify(users));
+  showToast("Account created successfully!");
+  toggleForms();
+}
+
+// Login function
+function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const remember = document.getElementById('remember').checked;
+
+  document.getElementById('loginEmailMsg').innerText='';
+  document.getElementById('loginPasswordMsg').innerText='';
+
+  if(!email || !password) { showToast("All fields are required"); return; }
+  if(!validateEmail(email)) { document.getElementById('loginEmailMsg').innerText="Invalid email"; return; }
+
+  const user = users.find(u=>u.username===email && u.password===password);
+  if(user){
+    if(remember) localStorage.setItem('rememberedUser', JSON.stringify(user));
+    else localStorage.removeItem('rememberedUser');
+    showToast("Login successful!");
+    setTimeout(()=>window.location.href='dashboard.html',500);
+  } else showToast("Invalid email or password");
+}
+
+// Forgot password
+function forgotPassword() {
+  const email = prompt('Enter your registered email:').trim();
+  if(!email) return;
+  if(!validateEmail(email)) { showToast("Invalid email"); return; }
+
+  const userIndex = users.findIndex(u=>u.username===email);
+  if(userIndex===-1){ showToast("No account found"); return; }
+
+  const newPass = prompt("Enter your new password:").trim();
+  if(!newPass) { showToast("Password cannot be empty"); return; }
+
+  users[userIndex].password=newPass;
+  localStorage.setItem('users', JSON.stringify(users));
+  showToast("Password reset successfully!");
+}
+
+// Auto-fill remembered email
+window.onload = ()=>{
+  const rememberedUser = JSON.parse(localStorage.getItem('rememberedUser'));
+  if(rememberedUser){
+    document.getElementById('loginEmail').value = rememberedUser.username;
+    document.getElementById('remember').checked = true;
+  }
+}
+</script>
+</body>
+</html>
+

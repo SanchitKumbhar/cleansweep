@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - CleanSweep</title>
+<style>
+body{margin:0;font-family:"Poppins",sans-serif;background:linear-gradient(135deg,#b2dfdb,#004d40);color:#00332d;min-height:100vh;display:flex;}
+.sidebar{width:220px;background:white;border-right:3px solid #a5d6a7;padding:20px;display:flex;flex-direction:column;gap:10px;}
+.sidebar h2{color:#004d40;text-align:center;margin-bottom:20px;}
+.sidebar button{background:none;border:none;padding:10px;border-radius:8px;cursor:pointer;text-align:left;font-size:15px;color:#004d40;transition:all 0.3s;}
+.sidebar button:hover,.sidebar button.active{background:#b2dfdb;font-weight:bold;transform:scale(1.03);}
+.main{flex:1;padding:30px;background:#f0fdfb;overflow-y:auto;}
+header{display:flex;justify-content:space-between;align-items:center;}
+header h1{color:#004d40;}
+.user{display:flex;align-items:center;gap:10px;}
+.avatar{width:35px;height:35px;background:#004d40;color:white;border-radius:50%;display:flex;justify-content:center;align-items:center;}
+.table-section{margin-top:40px;background:white;border-radius:10px;padding:20px;box-shadow:0 3px 6px rgba(0,0,0,0.1);}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{padding:10px;border-bottom:1px solid #ccc;text-align:left;font-size:14px;}
+th{color:#004d40;}
+.status{padding:4px 10px;border-radius:10px;color:white;font-size:13px;}
+.status.pending{background:#ffb300;}
+.status.resolved{background:#4caf50;}
+.status.active{background:#4db6ac;}
+img.photo{width:60px;height:60px;object-fit:cover;border-radius:5px;}
+select{padding:5px;border-radius:5px;}
+button.assign{padding:5px 10px;background:#00796b;color:white;border:none;border-radius:5px;cursor:pointer;}
+button.assign:hover{background:#004d40;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:#80cbc4;border-radius:10px;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+<h2>Admin Panel</h2>
+<button class="active">📋 Manage Complaints</button>
+<button onclick="window.location.href='tracking.html'">📊 Track Complaints</button>
+<a href="/logout"><button>🚪 Logout</button></a>
+</aside>
+
+<main class="main">
+<header>
+<h1>Manage Complaints</h1>
+<div class="user">
+<span class="avatar">A</span>
+<span>Admin</span>
+</div>
+</header>
+
+<section class="table-section">
+<h3>All Complaints</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Description</th>
+<th>Status</th>
+<th>Name of Student</th>
+<th>Photo</th>
+<th>Location</th>
+<th>Updated</th>
+</tr>
+</thead>
+<tbody id="complaintTable">
+      {% for i in reports %}
+      <tr>
+      <td>{{i.pk}}</td>
+      <td>{{i.description}}</td>
+      <td>{{i.status}}</td>
+      <td>{{i.name}}</td>
+      <td>
+        <a href="media/{{i.picture}}" style="text-decoration : none">check pitcure</a>
+      </td>
+      <td>Pune, Maharashtra</td>
+      <td>17-Oct-2025 10:00 AM</td>
+    </tr>
+    {% endfor %}
+    
+</tbody>
+</table>
+</section>
+</main>
+
+<script>
+// Logout
+{% comment %} function logout(){window.location.href='login.html';}
+
+// Load all complaints
+window.onload=()=>{loadComplaints();}
+
+function loadComplaints(){
+  const complaints=JSON.parse(localStorage.getItem('complaints'))||[];
+  const tbody=document.getElementById('complaintTable');
+  tbody.innerHTML='';
+
+  complaints.reverse().forEach(c=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${c.id}</td>
+      <td>${c.name}</td>
+      <td>${c.description}</td>
+      <td><span class="status ${c.status}">${c.status}</span></td>
+      <td>${c.coordinator || '-'}</td>
+      <td>${c.photo?`<img class="photo" src="${c.photo}" alt="photo">`:'-'}</td>
+      <td>${c.latitude && c.longitude ? c.latitude.toFixed(4)+', '+c.longitude.toFixed(4) : '-'}</td>
+      <td>${c.updated}</td>
+      <td>
+        <select id="status-${c.id}">
+          <option value="active" ${c.status==='active'?'selected':''}>Active</option>
+          <option value="resolved" ${c.status==='resolved'?'selected':''}>Resolved</option>
+          <option value="pending" ${c.status==='pending'?'selected':''}>Pending</option>
+        </select>
+        <input type="text" id="coord-${c.id}" placeholder="Coordinator" value="${c.coordinator||''}" style="width:90px;"/>
+        <button class="assign" onclick="updateComplaint(${c.id})">Update</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Update complaint
+function updateComplaint(id){
+  const complaints=JSON.parse(localStorage.getItem('complaints'))||[];
+  const complaintIndex=complaints.findIndex(c=>c.id===id);
+  if(complaintIndex===-1){alert("Complaint not found");return;}
+  const status=document.getElementById(`status-${id}`).value;
+  const coord=document.getElementById(`coord-${id}`).value.trim();
+  complaints[complaintIndex].status=status;
+  complaints[complaintIndex].coordinator=coord;
+  complaints[complaintIndex].updated=new Date().toLocaleString();
+  localStorage.setItem('complaints',JSON.stringify(complaints));
+  alert("Complaint updated successfully!");
+  loadComplaints();
+} {% endcomment %}
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+

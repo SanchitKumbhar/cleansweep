@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Issue - Clean Sweep</title>
+<style>
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #b2dfdb, #004d40);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+.form-container {
+  background: #e0f2f1;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+}
+.form-container h2 { text-align: center; color: #004d40; margin-bottom: 20px; }
+.camera-btn {
+  display: block; margin: 0 auto 15px auto; padding: 10px 20px;
+  background: #004d40; color: white; border: none; border-radius: 20px;
+  cursor: pointer; font-size: 16px;
+}
+.camera-btn:hover { background: #00332d; }
+.preview-img { display: block; margin: 10px auto; width: 200px; height: 200px; object-fit: cover; border-radius: 10px; border: 2px solid #004d40; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: #004d40; font-weight: bold; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #004d40; outline: none; font-size: 14px;
+}
+.form-group textarea { resize: vertical; height: 100px; }
+.submit-btn {
+  display: block; width: 100%; padding: 12px; background: #004d40;
+  color: white; font-size: 16px; border: none; border-radius: 20px; cursor: pointer; transition: background 0.3s;
+}
+.submit-btn:hover { background: #00332d; }
+.back-link { display: block; text-align: center; margin-top: 12px; color: #004d40; text-decoration: none; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+  <h2>Complaint Form</h2>
+
+<!-- Camera Upload -->
+<button type="button" class="camera-btn" id="camera-btn">Upload Photo / Take Picture</button>
+<input type="file" name="file" id="photo" accept="image/*" style="display:none">
+
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" name="name" id="name" placeholder="Enter your name">
+  </div>
+
+  <div class="form-group">
+    <label for="contact">Mobile / Email</label>
+    <input type="text" name="mobile" id="contact" placeholder="Enter mobile number or email">
+  </div>
+
+  <div class="form-group">
+    <label for="description">Complaint Description</label>
+    <textarea id="description" name="description" placeholder="Describe your complaint here..."></textarea>
+  </div>
+
+  <!-- Hidden geolocation fields -->
+  <input type="hidden" id="latitude">
+  <input type="hidden" id="longitude">
+
+  <button class="submit-btn" type="submit">Submit</button>
+  <a href="/client" class="back-link">⬅ Back to Dashboard</a>
+    </form>
+
+</div>
+<script>
+    document.getElementById("camera-btn").addEventListener("click", (e) => {
+    document.getElementById("photo").click();
+  });
+</script>
+</body>
+</html>
+
